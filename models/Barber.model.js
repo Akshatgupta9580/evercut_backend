@@ -31,6 +31,13 @@ const barberSetupSchema = new mongoose.Schema({
   // Step 4 - Set PIN
   pin: { type: String, required: true },
 
+  // Step 5 - Upload Cover Image
+  coverImage: {
+  url: { type: String },
+  public_id: { type: String }
+},
+
+
   createdAt: {
     type: Date,
     default: Date.now,

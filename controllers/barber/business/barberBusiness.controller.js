@@ -1,5 +1,7 @@
 import BarberSetup from '../../../models/Barber.model.js';
 import { validateBusinessUpdate } from './barberValidation.service.js';
+// const Barber = require('../../../models/Barber.model');
+const { cloudinary } = require('../../../config/cloudinary');
 
 // Update business info
 export const updateBusinessInfo = async (req, res) => {
@@ -89,4 +91,37 @@ export const updateBusinessInfo = async (req, res) => {
       message: 'Internal server error while updating profile'
     });
   }
+  
+  exports.uploadBarberCoverImage = async (req, res) => {
+  try {
+    const barberId = req.user._id; // authenticated barber
+    const barber = await Barber.findById(barberId);
+
+    if (!barber) {
+      return res.status(404).json({ error: 'Barber not found' });
+    }
+
+    // Delete existing cover image from Cloudinary
+    if (barber.coverImage?.public_id) {
+      await cloudinary.uploader.destroy(barber.coverImage.public_id);
+    }
+
+    // Save new image
+    barber.coverImage = {
+      url: req.file.path,
+      public_id: req.file.filename,
+    };
+
+    await barber.save();
+
+    res.status(200).json({
+      message: 'Cover image uploaded successfully',
+      coverImage: barber.coverImage,
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
 };
